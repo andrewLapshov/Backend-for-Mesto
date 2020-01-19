@@ -1,7 +1,7 @@
 {
   "name": "sprint-12",
   "version": "1.0.0",
-  "description": "",
+  "description": "Express.js server for project Mesto, Web-developer courses at Yandex Praktikum",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",

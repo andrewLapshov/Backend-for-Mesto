@@ -1,28 +1,18 @@
 const users = require('express').Router();
 const usersDB = require('../data/users');
 
-let user = [];
-
-const doesUserExists = (req, res, next) => {
-  user = usersDB.filter(item => {
+users.get('/:id', (req, res) => {
+  const user = usersDB.find(item => {
     return item._id === req.params.id;
   });
 
-  if (user.length === 0) {
+  if (user) {
+    res.send(user);
+  } else {
     res.status(404);
     res.send({ message: 'Нет пользователя с таким id' });
-    return;
   }
-
-  next();
-};
-
-const sendUser = (req, res, next) => {
-  res.send(user);
-};
-
-users.get('/:id', doesUserExists);
-users.get('/:id', sendUser);
+});
 
 users.get('/', (req, res) => {
   res.send(usersDB);
