@@ -1,4 +1,5 @@
 const Card = require('../models/card');
+const NotFoundError = require('../errors/NotFoundError');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -15,8 +16,16 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then(card => res.status(200).send({ data: card }))
+  const { cardId } = req.params;
+  Card.findOne({ _id: cardId })
+    .orFail(() => {
+      throw new NotFoundError('Карточка не найдена');
+    })
+    .then(() => {
+      Card.findByIdAndRemove(cardId)
+        .then(card => res.status(200).send({ data: card }))
+        .catch(next);
+    })
     .catch(next);
 };
 
@@ -26,6 +35,9 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(() => {
+      throw new NotFoundError('Неверный запрос');
+    })
     .then(card => res.status(200).send({ data: card }))
     .catch(next);
 };
@@ -36,6 +48,9 @@ module.exports.dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
+    .orFail(() => {
+      throw new NotFoundError('Неверный запрос');
+    })
     .then(card => res.status(200).send({ data: card }))
     .catch(next);
 };

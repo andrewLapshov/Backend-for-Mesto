@@ -1,7 +1,11 @@
 const User = require('../models/user');
+const NotFoundError = require('../errors/NotFoundError');
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.params.id)
+    .orFail(() => {
+      throw new NotFoundError('Пользователь не найден');
+    })
     .then(user => res.status(200).send({ data: user }))
     .catch(next);
 };
@@ -31,6 +35,9 @@ module.exports.updateUserInfo = (req, res, next) => {
       runValidators: true,
     },
   )
+    .orFail(() => {
+      throw new NotFoundError('Пользователь не найден');
+    })
     .then(user => res.status(200).send({ data: user }))
     .catch(next);
 };
@@ -47,6 +54,9 @@ module.exports.updateUserAvatar = (req, res, next) => {
       runValidators: true,
     },
   )
+    .orFail(() => {
+      throw new NotFoundError('Пользователь не найден');
+    })
     .then(user => res.status(200).send({ data: user }))
     .catch(next);
 };
