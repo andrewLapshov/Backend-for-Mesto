@@ -1,18 +1,30 @@
 const express = require('express');
-const path = require('path');
-const users = require('./routes/users');
-const cards = require('./routes/cards');
+const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
+
+const router = require('./routes/index');
+const { errorHandler } = require('./middlewares/errorhandler');
 
 const { PORT = 3000 } = process.env;
 const app = express();
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use('/users', users);
-app.use('/cards', cards);
-app.use((req, res) => {
-  res.status(404);
-  res.send({ message: 'Запрашиваемый ресурс не найден' });
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+mongoose.connect('mongodb://localhost:27017/mestodb', {
+  useNewUrlParser: true,
+  useCreateIndex: true,
+  useFindAndModify: false,
 });
+
+app.use((req, res, next) => {
+  req.user = {
+    _id: '5e31c197626b4c2e686f7f28',
+  };
+  next();
+});
+app.use(router);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
