@@ -1,8 +1,10 @@
 const Card = require('../models/card');
 const NotFoundError = require('../errors/NotFoundError');
+const NoPermissions = require('../errors/NoPermissions');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
+    .populate('owner')
     .then(card => res.status(200).send({ data: card }))
     .catch(next);
 };
@@ -21,7 +23,10 @@ module.exports.deleteCard = (req, res, next) => {
     .orFail(() => {
       throw new NotFoundError('Карточка не найдена');
     })
-    .then(() => {
+    .then(cardInfo => {
+      if (String(cardInfo.owner) !== req.user._id) {
+        throw new NoPermissions('Нет прав на удаление чужой карточки');
+      }
       Card.findByIdAndRemove(cardId)
         .then(card => res.status(200).send({ data: card }))
         .catch(next);
