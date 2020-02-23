@@ -24,7 +24,7 @@ module.exports.deleteCard = (req, res, next) => {
       throw new NotFoundError('Карточка не найдена');
     })
     .then(cardInfo => {
-      if (String(cardInfo.owner) !== req.user._id) {
+      if (!cardInfo.owner.equals(req.user._id)) {
         throw new NoPermissions('Нет прав на удаление чужой карточки');
       }
       Card.findByIdAndRemove(cardId)
