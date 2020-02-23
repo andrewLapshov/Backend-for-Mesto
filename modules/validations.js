@@ -1,12 +1,19 @@
 const { celebrate, Joi } = require('celebrate');
+Joi.objectId = require('joi-objectid')(Joi);
 
 const signupRequestCheck = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required(),
+    name: Joi.string()
+      .required()
+      .min(2)
+      .max(30),
     avatar: Joi.string()
       .required()
       .uri(),
-    about: Joi.string().required(),
+    about: Joi.string()
+      .required()
+      .min(2)
+      .max(30),
     email: Joi.string()
       .required()
       .email(),
@@ -28,24 +35,29 @@ const loginRequestCheck = celebrate({
 });
 
 const authRequestCheck = celebrate({
-  cookies: Joi.object().keys({
-    jwt: Joi.string().required(),
-  }),
+  cookies: Joi.object()
+    .keys({
+      jwt: Joi.string().required(),
+    })
+    .unknown(),
 });
 
 const getUserRequestCheck = celebrate({
   params: Joi.object().keys({
-    id: Joi.string()
-      .required()
-      .alphanum()
-      .length(24),
+    id: Joi.objectId().required(),
   }),
 });
 
 const updateUserInfoRequestCheck = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required(),
-    about: Joi.string().required(),
+    name: Joi.string()
+      .required()
+      .min(2)
+      .max(30),
+    about: Joi.string()
+      .required()
+      .min(2)
+      .max(30),
   }),
 });
 
@@ -71,10 +83,7 @@ const cardRequestCheck = celebrate({
 
 const cardIdRequestCheck = celebrate({
   params: Joi.object().keys({
-    cardId: Joi.string()
-      .required()
-      .alphanum()
-      .length(24),
+    cardId: Joi.objectId().required(),
   }),
 });
 
