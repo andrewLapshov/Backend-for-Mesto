@@ -1,11 +1,20 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const { errors } = require('celebrate');
 
 const router = require('./routes/index');
+const {
+  signupRequestCheck,
+  loginRequestCheck,
+  authRequestCheck,
+} = require('./modules/validations');
+const { auth } = require('./middlewares/auth');
+const { login, createUser } = require('./controllers/users');
 const { errorHandler } = require('./middlewares/errorhandler');
+const { PORT } = require('./constants/config');
 
-const { PORT = 3000 } = process.env;
 const app = express();
 
 app.use(bodyParser.json());
@@ -17,13 +26,15 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useFindAndModify: false,
 });
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '5e31c197626b4c2e686f7f28',
-  };
-  next();
-});
+app.post('/signin', loginRequestCheck, login);
+app.post('/signup', signupRequestCheck, createUser);
+
+app.use(cookieParser());
+app.use(authRequestCheck, auth);
+
 app.use(router);
+
+app.use(errors());
 app.use(errorHandler);
 
 app.listen(PORT, () => {

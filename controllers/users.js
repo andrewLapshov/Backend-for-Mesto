@@ -1,4 +1,7 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const { JWT_SECRET } = require('../constants/config');
 const NotFoundError = require('../errors/NotFoundError');
 
 module.exports.getUser = (req, res, next) => {
@@ -10,11 +13,33 @@ module.exports.getUser = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.createUser = (req, res, next) => {
-  const { name, about, avatar } = req.body;
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
 
-  User.create({ name, about, avatar })
-    .then(user => res.status(201).send({ data: user }))
+  return User.findUserByCredentials(email, password)
+    .then(user => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: '7d',
+      });
+      res
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true,
+        })
+        .end();
+    })
+    .catch(next);
+};
+
+module.exports.createUser = (req, res, next) => {
+  const { name, about, avatar, email, password } = req.body;
+  bcrypt
+    .hash(password, 10)
+    .then(hash => User.create({ name, about, avatar, email, password: hash }))
+    .then(user => {
+      const { password: pass, ...newUser } = user._doc;
+      res.status(201).send(newUser);
+    })
     .catch(next);
 };
 
