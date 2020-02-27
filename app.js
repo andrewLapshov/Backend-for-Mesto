@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
@@ -15,14 +14,14 @@ const {
 const { auth } = require('./middlewares/auth');
 const { login, createUser } = require('./controllers/users');
 const { errorHandler } = require('./middlewares/errorhandler');
-const { PORT } = require('./constants/config');
+const { PORT, MONGO_IP } = require('./constants/config');
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+mongoose.connect(MONGO_IP, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,

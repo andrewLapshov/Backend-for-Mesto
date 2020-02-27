@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { JWT_SECRET } = require('../constants/config');
 const LoginFailedError = require('../errors/LoginFailedError');
 
 module.exports.auth = (req, res, next) => {
@@ -13,10 +13,7 @@ module.exports.auth = (req, res, next) => {
   let payload;
 
   try {
-    payload = jwt.verify(
-      token,
-      NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret',
-    );
+    payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
     throw new LoginFailedError('Авторизация не выполнена');
   }
