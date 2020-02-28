@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const router = require('./routes/index');
 const {
@@ -13,17 +14,25 @@ const {
 const { auth } = require('./middlewares/auth');
 const { login, createUser } = require('./controllers/users');
 const { errorHandler } = require('./middlewares/errorhandler');
-const { PORT } = require('./constants/config');
+const { PORT, MONGO_IP } = require('./constants/config');
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+mongoose.connect(MONGO_IP, {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
+});
+
+app.use(requestLogger);
+
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
 });
 
 app.post('/signin', loginRequestCheck, login);
@@ -33,6 +42,8 @@ app.use(cookieParser());
 app.use(authRequestCheck, auth);
 
 app.use(router);
+
+app.use(errorLogger);
 
 app.use(errors());
 app.use(errorHandler);

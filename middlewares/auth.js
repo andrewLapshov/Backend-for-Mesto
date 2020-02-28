@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+
 const { JWT_SECRET } = require('../constants/config');
 const LoginFailedError = require('../errors/LoginFailedError');
 
